@@ -13,15 +13,15 @@ VAR
       (funcU, intU, VTbindU, TVbindU, VVbindU, succeedU, failU);
   
 
-(*PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): UnifyResult; *)
-PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): BOOLEAN;
+PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): UnifyResult; 
+(* PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): BOOLEAN; *)
 (* Unify x1 and x2.  Perform the matching substitution
    by binding variables. *)
   
 VAR y1, y2: term;
   
-   (*PROCEDURE UnifyArgs(s1, s2: term): UnifyResult; *)
-   PROCEDURE UnifyArgs(s1, s2: term): BOOLEAN;
+   PROCEDURE UnifyArgs(s1, s2: term): UnifyResult; 
+(*   PROCEDURE UnifyArgs(s1, s2: term): BOOLEAN; *)
    (* Unify the arguments of a pair of functor nodes. *)
    VAR
        t1, t2: term; 
