@@ -8,6 +8,6 @@ mocka -s Unify
 
 for x in *.def
 do
-  echo $x
-  mocka -s $(basename $x .def)
+ echo $x
+ mocka -s $(basename $x .def)
 done
