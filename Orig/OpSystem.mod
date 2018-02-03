@@ -3,8 +3,11 @@ IMPLEMENTATION MODULE OpSystem;
 
 FROM SYSTEM IMPORT ADDRESS (*,VAL*);
 
-FROM XBIOS     IMPORT SuperExec;
-FROM Terminal  IMPORT Read, Write;
+(* FROM XBIOS     IMPORT SuperExec; *)
+(* FROM Terminal  IMPORT Read, Write; *)
+(* Mocka : *)
+FROM BasicIO IMPORT Read, Write;
+FROM Clock IMPORT ResetClock, UserTime;
 
 CONST SystemTimer = 04BAH; 
 
@@ -28,9 +31,10 @@ PROCEDURE Time(): LONGCARD;
 BEGIN
 
   Ptr:=WordPointer(SystemTimer);
-  SuperExec(GetTime);
+  (* SuperExec(GetTime); *)
+  UserTime();
     
-  RETURN TimerValue*5D
+  RETURN TimerValue*5H
     
 END Time;
 
