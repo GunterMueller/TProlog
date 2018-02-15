@@ -1,0 +1,125 @@
+  
+(*  ...
+  
+[6]  ATOM TABLE
+  
+Each atom is associated with operator and clause information which is
+stored in an 'atomentry'.  The identifiers for atoms in the input are
+mapped to the corresponding entry through a hash table.  Collisions are 
+handled by chaining together atom entries.
+  
+... *)
+  
+DEFINITION MODULE AtomTable;
+
+CONST
+
+   StringSpace = 5000           (* Size of string buffer. *);
+   MaxPrec = 1200               (* Max. operator precedence. *); 
+   MaxEvalArity = 4             (* Max. arity for evaluable predicates. *);
+
+TYPE 
+   
+   optype = (fxO, fyO, xfO, yfO, xfxO, xfyO, yfxO, nonO);
+   prec = [0 .. MaxPrec];
+   predtype = (normP, evalP);
+
+   evalpred = (callR, cutR, readR, writeR, get0R, putR, nlR, eolnR, eofR,
+      nameR, opR, abortR, haltR, atomR, integerR, varR, flagR, setflgR,
+      isR, ltR, addclR, clenvR, getclR, advclR, zapR, nonspR,
+      functorR, argR, seeR, seeingR, tellR, tellingR, closeR, ucodeR,
+      
+      (* new predicates: *)
+      
+      timeR, inferencesR, showtermR, showvarR, listingR, consultR, reconsultR,
+      ccompileR);
+      
+   evalarity = [0 .. MaxEvalArity];
+
+   atom = POINTER TO atomentry;
+  
+   clptr = POINTER TO clause;
+
+   strindex = [0 .. StringSpace];
+   astring = 
+      RECORD
+         index: strindex        (* Chars are stringbuf[index + 1] ... *);
+         length: CARDINAL        (* ... to stringbuf[index + length]. *)
+      END;
+
+   
+   atomentry =
+      RECORD
+         ident: astring;
+         atomno: INTEGER; 
+         chain: atom;
+         oclass: optype;
+         oprec: prec;
+         sys: BOOLEAN;
+         CASE pclass: predtype OF
+            normP: proc: clptr;
+         |  evalP: routine: evalpred;
+                     arity: evalarity
+         END
+      END;
+
+   term = POINTER TO node;
+   nodetag = (funcT, intT, varT, anonT, skelT);
+   nodeinfo =
+      RECORD
+      CASE tag: nodetag OF
+         funcT: name: atom;
+                arity: INTEGER;
+                son: term;
+      |  intT:  ival: INTEGER;
+      |  varT:  val: term;
+      |  anonT: dummych: CHAR;
+      |  skelT: offset: INTEGER
+      END
+    END;
+  
+   fieldtype = (globalF, localF, heapF);
+   
+   node =
+      RECORD
+         brother: term          (* Next among args if parent functor. *);
+         chain: term            (* Used to link nodes on global stack. *);
+         field: fieldtype;
+         scope: INTEGER         (* Used with field to give lifetime. *);
+         info: nodeinfo
+      END;
+
+   key = INTEGER;
+   clause =
+      RECORD
+         head: term             (* Skeleton for head of clause. *);
+         body: term             (* First goal in skeletal body. *);
+         nvars: INTEGER         (* No. of local vars excluding anons. *);
+         denied: BOOLEAN        (* Set by 'deny' via '$zap'. *);
+         refcount: INTEGER      (* Number of activations. *);
+         keyval: key            (* Saved result of Hash(head). *);
+         chain: clptr           (* Next clause in procedure. *);
+         backchain: clptr       (* Previous clause. *);
+         heapchain: term        (* Chain of nodes in skeleton. *);
+      END;
+   
+  
+VAR
+   newatom: astring             (* Temporary atom name under construction. *);
+   stringbuf:                   (* Space to store atom names. *)
+     ARRAY [1 .. StringSpace] OF CHAR;
+
+   (* Various constant atoms. *)
+   commaA, nilA, consA, cutA, semiA, questionA, arrowA, fxA, fyA, xfA,
+      yfA, xfxA, xfyA, yfxA, curlyA, callA, endA, plusA, minusA, timesA, 
+      divideA, modA, negA, trueA, failA, repeatA, topA, userA, gramA: atom;
+  
+   andG, or1G, or2G: clptr      (* Clauses transparent to cut. *);
+  
+PROCEDURE StartAtom;
+  
+PROCEDURE AtomChar(c: CHAR); 
+  
+PROCEDURE LookUp(): atom; 
+
+END AtomTable.

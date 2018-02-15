@@ -1,0 +1,39 @@
+  
+(*  ...
+  
+[5]  FUNCTIONS ON TERMS
+  
+This module contains an assortment of useful functions and procedures
+for handling terms.
+  
+... *)
+  
+DEFINITION MODULE Terms;
+
+FROM AtomTable IMPORT atom, term, astring;
+FROM Stacks    IMPORT env;
+
+PROCEDURE MakeFunc(a: atom; m: INTEGER; s: term): term;
+  
+PROCEDURE MakeInt(i: INTEGER): term;
+  
+PROCEDURE MakeVar(v: term): term;
+  
+PROCEDURE MakeBros(x, y: term): term;
+  
+PROCEDURE IsFunc(x: term; a: atom; m: INTEGER): BOOLEAN;
+  
+PROCEDURE IsAtom(x: term): BOOLEAN;
+  
+PROCEDURE ListRep(s: astring): term;
+  
+PROCEDURE Deref(x: term; e: env): term;
+  
+PROCEDURE BindVars(v1, v2: term);
+
+PROCEDURE Bind(v, x: term; ev, e: env; depth: INTEGER);
+  
+PROCEDURE GetBody(v, b: term; ev, eb: env);
+
+END Terms.
+

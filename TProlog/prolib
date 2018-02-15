@@ -1,0 +1,311 @@
+
+ /*  PROLIB :  diese Datei enth~lt Standardpr~dikate und  */
+ /*  ------    -operatoren f~r das PROLOG-System          */
+  
+ /*  folgende Pr~dikate sind im Interpreter 'fest verdrahtet':
+
+  call     (Goal),
+  !,
+  get0     (Char),
+  put      (Char),  ?
+  nl,
+  abort,
+  halt,
+  atom     (Term),
+  integer  (Term),
+  var      (Term),...
+  name,    (_,_),
+  is,      (_,_),
+  <,       (_,_),  
+  functor, (_,_,_),
+  arg,     (_,_,_),
+  eoln,
+  eof,
+  see      (File),
+  seeing   (File),
+  tell     (File),
+  telling  (File),
+  close    (File),
+  '$op'    (Prec,Assoz,Name),
+  '$clenv' (_,_,_,_),
+  '$getcl' (_,_,_,_),
+  '$advcl' (_),
+  '$zap'   (_),
+  '$addcl' (_,_),
+  '$read'  (Term,Vlist),
+  '$write' (Term,Style),
+  '$setflg'(Nummer,Wert), 
+  '$flag'  (Nummer,Wert),
+  '$ucode' (_),
+  '$nonsp' (_).                     */
+
+
+ /* Deklarationen der Standard-Operatoren mit
+   Vorrangklasse, Assoziativit~t und Namen  */ 
+  
+ ?-('$op'(1200,  fx, (?-))).
+ ?- '$op'(1200, xfx, :-).
+ ?- '$op'(1000, xfy, ',').
+ ?- '$op'(1200, xfx, -->).
+ ?- '$op'(1100, xfy, ;). 
+ ?- '$op'(1050, xfy, ->).
+ ?- '$op'( 800,  fy, not).
+ ?- '$op'( 800,  fy, spy).
+ ?- '$op'( 800,  fy, nospy).
+ ?- '$op'( 750, xfy, '.').
+ ?- '$op'( 700, xfx, =). 
+ ?- '$op'( 700, xfx, \=).
+ ?- '$op'( 700, xfx, ==).
+ ?- '$op'( 700, xfx, \==).
+ ?- '$op'( 700, xfx, =:=).
+ ?- '$op'( 700, xfx, =\=).
+ ?- '$op'( 700, xfx, <). 
+ ?- '$op'( 700, xfx, >). 
+ ?- '$op'( 700, xfx, <=).
+ ?- '$op'( 700, xfx, =<).
+ ?- '$op'( 700, xfx, >=).
+ ?- '$op'( 700, xfx, is).
+ ?- '$op'( 700, xfx, =..).
+ ?- '$op'( 500, yfx, +). 
+ ?- '$op'( 500, yfx, -). 
+ ?- '$op'( 400, yfx, *). 
+ ?- '$op'( 400, yfx, /). 
+ ?- '$op'( 400, yfx, mod).
+ ?- '$op'( 300,  fy, ~). 
+
+ op(P, F, A) :- '$op'(P, F, A).
+  
+  
+ /* Operatoren ',' '->' und ';'   */
+  
+ (P, Q) :- P, Q.
+  
+ (P -> Q; R) :- P, !, Q.    /* if P then Q else R */
+ (P -> Q; R) :- !, R.
+ (P -> Q)    :- P, !, Q.    /* if P then Q */
+  
+ (P ; Q )  :- P. 
+ (P ; Q )  :- Q. 
+  
+ true.     /* false :- !, fail. */
+ repeat.
+
+ not P :- P, !, fail. 
+ not P.
+
+ X = X.
+  
+ X \= X :- !, fail.    /* not X = Y  */
+ X \= Y.
+  
+ nonvar(X) :- not var(X).
+  
+ atomic(X) :- atom(X), !.
+ atomic(X) :- integer(X). 
+  
+ X == Y :- X \== Y, !, fail.   /* not X \== Y  */
+ X == Y.
+  
+ X \== Y :- '$same'(X, Y), !, fail.
+ X \== Y. 
+   '$same'(X, Y) :- var(X), !, var(Y), '$samev'(X, Y).
+   '$same'(X, Y) :- var(Y), !, fail.
+   '$same'(X, Y) :- atomic(X), !, X = Y. 
+   '$same'(X, Y) :- atomic(Y), !, fail.
+   '$same'(X, Y) :- X =.. [F | Ax], Y =.. [F | Ay], '$samea'(Ax, Ay).
+     '$samea'([], []) :- !. 
+     '$samea'([X | Ax], [Y | Ay]) :- '$same'(X, Y), '$samea'(Ax, Ay).
+     '$samev'(X, Y) :- X = 42, var(Y), !, fail.  /* ??? 42 ??? */
+     '$samev'(X, Y).
+
+ /* arithmetische Relationen */
+  
+ X =:= Y  :- Z is X, Z is Y.
+ X =\= Y  :- not (X =:= Y).
+  
+ X > Y  :- Y < X.
+ X <= Y :- not ( Y < X ). 
+ X =< Y :- X <= Y .
+ X >= Y :- not ( X < Y ) .
+
+ /* Listenpr~dikate */
+
+ islist(V)  :- var(V), !, fail.
+ islist([]) :- !.
+ islist([_|_]). 
+  
+ length(V,_) :- var(V), !, fail.
+ length([],0) :- !.
+ length([_|L],N1) :- length(L,N), N1 is N+1.
+  
+ member(E,[E|_]).
+ member(E,[_|L]) :- member(E,L).
+  
+ append([], L, L).
+ append([H | L1], L2, [H | L]) :- append(L1, L2, L).
+  
+ reverse([],[]).
+ reverse([X|A],B):- reverse(A,C),append(C,[X],B).
+  
+ intersection([],X,[]).
+ intersection([X|R],Y,[X|Z]):- member(X,Y), !, intersection(R,Y,X).
+ intersection([X|R],Y,Z):-(R,Y,Z).
+  
+  functest(A,B,C) :- functor(A,B,C).
+  
+ T =.. [F | A] :-  nonvar(T), !, functest(T, F, _), 'alist'(1, T, A).
+ T =.. [F | A] :-  atom(F), !, length(A, N), functor(T, F, N),
+                                  '$alist'(1, T, A).
+ T =.. [T]     :-  integer(T).
+   'alist'(I, T, A) :-  arg(I, T, X), !, A = [X | A1], I1 is I + 1,
+                         'alist'(I1, T, A1).
+   'alist'(_, _, []).
+  
+ clause(P, Q) :- '$clenv'(P, N), '$findcl'(P, Q, N).
+ deny(P, Q)   :- '$clenv'(P, N), '$findcl'(P, Q, N), '$zap'(N).
+   '$findcl'(P, Q, N) :- '$getcl'(P, N, P0, Q0), '$trycl'(P, Q, P0, Q0, N).
+     '$trycl'(P, Q, P, Q, _).
+     '$trycl'(P, Q, _, _, N) :- '$advcl'(N), '$findcl'(P, Q, N).
+  
+ retract((P :- Q)) :- !, deny(P, Q). 
+ retract(P)        :- deny(P, true).
+  
+ retractall(P) :- deny(P, _), fail.
+ retractall(_).
+  
+ /* Consult & Reconsult */
+  
+ consult(F) :- '$consult'(F,consult). 
+  
+ reconsult(F) :-  retractall('$done'(_)), '$consult'(F,reconsult),
+                  retractall('$done'(_)).
+  
+ '$consult'(F,R) :-
+    seeing(F0), close(F), see(F), telling(G0), tell(user),
+    repeat, '$prompt', read(X), nonvar(X),  '$crunch'(X,R), '$setflg'(1,0),
+    seen, see(F0), tell(G0), !.
+
+   '$prompt' :- seeing(user), !, write('| ').
+   '$prompt'.
+  
+   '$crunch'((?- end),R) :- !.
+   '$crunch'((?- X),R)   :- !, call(X), !, fail. 
+   '$crunch'(X,R)        :- '$tran'(X,Y), '$head'(Y,H), '$erase'(R,H),
+                                 call(assertz(Y)), !, fail.
+
+    '$tran'(X,Y) :- '$gtran'(X,Y), !.  /* undef. */
+    '$tran'(X,X).
+
+    '$head'((A :- B),A) :- !.
+    '$head'(A,A).
+  
+    '$erase'(consult,H) :- !. 
+    '$erase'(reconsult,H) :- '$done'(H), !. 
+    '$erase'(reconsult,H) :- nonvar(H), functor(H,F,N), functor(P,F,N),
+                   retractall(P), '$respy'(P), asserta('$done'(P)), !.
+    '$erase'(R,H).
+
+ asserta(Clause)  :- '$addcl'(Clause,1), '$markp1'(Clause).
+ assertz(Clause)  :- '$addcl'(Clause,2), '$markp2'(Clause).
+  assert(Clause)  :- '$addcl'(Clause,2), '$markp2'(Clause).
+
+   '$markp1'(M) :- '$head'(M,H), functor(H,F,N),
+                      ( '$marked'(F)  ;  '$addcl'('$marked'(F),1)  ).
+   '$markp2'(M) :- '$head'(M,H), functor(H,F,N),
+                      ( '$marked'(F)  ;  '$addcl'('$marked'(F),2)  ).
+
+ /* Ein- und Ausgabe */
+ 
+ read(X)    :- '$read'(X, _) .
+ write(X)   :- '$write'(X, 1).  /* in CallEvalPred einbauen ! */
+ writeq(X)  :- '$write'(X, 2).
+ display(X) :- '$write'(X, 3).
+ print(X)   :-  portray(X), !. 
+ print(X)   :- '$write'(X, 2). 
+  
+ get(X)  :- repeat, get0(Y), '$nonsp'(Y), !, X = Y.
+  
+ skip(X) :- Y is X, repeat, get0(Y), !. 
+   
+ tab(0)  :- !.
+ tab(N)  :- N > 0, write(' '), N1 is N - 1, tab(N1).
+  
+ seen :- seeing(F), close(F).
+ told :- telling(F), close(F).
+  
+ save(F) :- atom(F), told, tell(F), listing, told.   /* telling ?? */
+
+ /* Listing - noch verbesserungsf~hig !  */
+
+ trace   :- '$setflg'(3,1). 
+ notrace :- '$setflg'(3,0).
+  
+ listing :- repeat, ('$marked'(X), listing(X), fail ; true ), !. 
+  
+ listing(A) :- atom(A), functor(P,A,1), '$clenv'(P,N), nl, '$list'(P,N), fail.
+ listing(A) :- atom(A).
+  
+ '$list'(P,N) :-  repeat,
+    (  '$getcl'(P,N,P0,Q0)  -> '$show'(P0,Q0), write(' .'), nl, nl,
+       '$advcl'(N), fail  ;  true  ), !.
+  
+   '$show'(P,true)    :- !, writeq(P).
+   '$show'(P,Q)       :- writeq(P), write(' :- '), nl, tab(3), '$showb'(Q,3).
+   
+   '$showb'((P;Q),N)  :- !, '$show2'(P,N), nl, '$outdent'(';  ',N), '$showb'(Q,N).
+   '$showb'(P,N)      :- '$show2'(P,N).
+  
+   '$show2'((P->Q),N) :- !, '$show1'(P,N), nl, '$outdent'('-> ',N), '$show2'(Q,N).
+   '$show2'(P,N)      :- '$show1'(P,N).
+  
+   '$show1'((P,Q),N)  :- !, '$showg'(P,N), write(','), nl, tab(N), '$show1'(Q,N).
+   '$show1'(P,N)      :- '$showg'(P,N).
+  
+   '$showg'(V,N)      :- var(V), !, writeq(V).
+   '$showg'(P,N)      :- (  P = (_;_); P = (_->_); P = (_,_)  ), !,
+                     write('(  '), N3 is N + 3, '$showb'(P,N3), write('  )').
+   '$showg'(not P,N)  :- !, write('not '), N4 is N + 4, '$showg'(P,N4).
+   '$showg'(P,N)      :- writeq(P).
+  
+     '$outdent'(X,N) :- N3 is N - 3, tab(N3), write(X). 
+  
+
+ findall(X,G,_) :- '$addcl'('$found'('$m'),1), G, '$addcl'('$found'(X),1), fail.
+ findall(_,_,L) :- '$collect'([],M), !, L = M.
+   '$collect'(S,L) :- '$getnext'(X), !, '$collect'([X|S],L).
+   '$collect'(L,L).
+      '$getnext'(X) :- retract('$found'(X)), !, X \== '$m'.
+  
+/* Top Level */
+  
+'$top' :- repeat, see(user), tell(user), nl, write('?- '), 
+           '$read'(X,VList), '$okcmd'(X), '$exec'(X,VList).
+ '$okcmd'(X) :- nonvar(X), functor(X,A,_), atom(A).
+  
+ /* '$exec'('bye',_) :- !, nl, write(' * Prolog regul~r beendet *'). */
+ '$exec'((?- end),_) :- !, fail.
+ '$exec'(X,V) :- '$exec1'(X,V), !, tell(user), nl, write('  ja '), nl, fail.
+ '$exec'(_,_) :- tell(user), nl, write(' nein'), nl, fail. 
+   '$exec1'(G,[]) :- !, G.
+   '$exec1'(G,V)  :- G, '$uio'('$soln'(V)).
+     '$uio'(G) :-  seeing(Fi), telling(Fo), see(user), tell(user),
+                                '$uio1'(G, Fi, Fo), !.
+       '$uio1'(G,Fi,Fo) :-  G, see(Fi), tell(Fo).
+       '$uio1'(_,Fi,Fo) :-     see(Fi), tell(Fo), fail.
+  
+  '$soln'(V) :- '$psoln'(V), nl, nl, '$response'(X), X \= ';'.
+
+    '$psoln'([B])   :- !, '$psoln1'(B).
+    '$psoln'([B|A]) :- '$psoln1'(B), write(','), '$psoln'(A). 
+       '$psoln1'(B) :- B =.. [V,T], nl, write(V), write(' = '), writeq(T).
+  
+    '$response'(X) :- repeat, '$resp1'(Y), !, skipln, name(X,[Y]).
+       '$resp1'(Y) :- eof, nl, !, Y is " ". 
+       '$resp1'(Y) :- get0(Y),'$nonsp'(Y). 
+
+
+?- nl, write(' * PROLIB eingelesen * '), nl.
+
+?- end.
+
+/******************************************************/

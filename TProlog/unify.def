@@ -1,0 +1,10 @@
+
+DEFINITION MODULE Unify;
+
+FROM AtomTable IMPORT term;
+FROM Stacks    IMPORT env;
+
+PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): BOOLEAN;
+
+END Unify.
+

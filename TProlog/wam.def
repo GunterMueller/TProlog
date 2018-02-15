@@ -1,0 +1,20 @@
+
+DEFINITION MODULE WAM;
+
+TYPE
+
+WAMInstruction =
+
+       ( TryMeElse, RetryMeElse, TrustMeElseFail,
+         Call, Execute, Proceed,
+         Allocate, Deallocate,
+         GetVarX, GetVarY, GetValueX, GetValueY,
+         GetStru, GetCons,
+         UnifyVarX, UnifyVarY, UnifyValueX, UnifyValueY,
+         UnifyCons,
+         PutVarX, PutVarY, PutValueX, PutValueY,
+         PutStru, PutCons
+       );
+
+
+END WAM.
