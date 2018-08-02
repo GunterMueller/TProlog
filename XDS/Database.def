@@ -1,1 +1,31 @@
-../Orig/Database.def
+  
+  
+(*  ...
+  
+[9]  DATABASE
+  
+The clauses which constitute the Prolog program are stored in skeletal
+form, with each variable replaced either by an anonymous variable or by
+a skeletal reference containing an offset from the base of a frame on
+the local stack. 
+  
+Access to the clauses for a predicate is via the atom entry for the
+name.  Space occupied by denied clauses is reclaimed when the clause
+is no longer in use: this is determined by a reference count maintained
+by the stack mechanism [4].
+  
+... *)
+  
+
+DEFINITION MODULE Database;
+
+FROM AtomTable IMPORT clptr, term;
+FROM Stacks    IMPORT env;
+  
+PROCEDURE FindClause(VAR cl: clptr; x: term; e: env): BOOLEAN;
+  
+PROCEDURE AddClause(newclause: term; envp: env; asserta: BOOLEAN): BOOLEAN;
+
+PROCEDURE DeleteClause(cl: clptr);
+
+END Database.

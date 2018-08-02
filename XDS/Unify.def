@@ -1,1 +1,13 @@
-../Orig/Unify.def
+
+DEFINITION MODULE Unify;
+
+FROM AtomTable IMPORT term;
+FROM Stacks    IMPORT env;
+
+TYPE UnifyResult = (Match, NoMatch);
+
+(* PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): BOOLEAN;  *)
+PROCEDURE Unify(x1, x2: term; e1, e2: env; depth: INTEGER): UnifyResult;
+
+END Unify.
+

@@ -1,1 +1,23 @@
-../Orig/Flags.def
+
+DEFINITION MODULE Flags;
+
+CONST
+   MaxDepth = 200;              (* Bound for recursion on terms *)
+  
+   SubPrec = 999                (* Max. prec. for subterms. *);
+  
+   (* Size and layout of flag vector. *)
+   FlagSize = 10;
+   sysmode = 1;
+   breaklevel = 2;
+   tracing = 3;
+   debugging = 4;
+   (* Flags 5 - 8 used by spy-points. *) 
+  
+VAR
+   flag: ARRAY [1 .. FlagSize] OF INTEGER
+                                (* Flags for switch settings etc. *);
+  
+PROCEDURE InitFlags;
+
+END Flags.

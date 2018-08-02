@@ -1,1 +1,8 @@
-../Orig/Compiler.def
+
+DEFINITION MODULE Compiler;
+
+FROM AtomTable IMPORT clptr;
+
+PROCEDURE ClCompiler(cl: clptr);
+
+END Compiler.

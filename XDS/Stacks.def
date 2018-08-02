@@ -1,1 +1,86 @@
-../Orig/Stacks.def
+  
+(*  ...
+  
+[3]  TRAIL
+  
+When backtracking occurs, it is necessary to undo the variable bindings
+introduced during execution of the failed clauses.  For this purpose,
+certain critical bindings are recorded on an auxiliary stack called the
+trail.  The critical bindings are those involving variables created in
+environments older than choicepoint: those newer than choicepoint will
+disappear when the stacks contract.
+  
+... *)
+
+  
+(*  ...
+  
+[4]  STACK MECHANISM
+  
+The abstract Prolog machine contains two stacks, the local stack and
+the global stack.  The local stack is held in the global array
+'display', with local variables in the global array 'locstack'.  These
+arrays have stack pointers 'envtop' and 'loctop' respectively.  The 
+global stack is held as a chain of nodes starting at 'glotop.'
+  
+Activation records for currently active clauses are kept on the local
+stacks together with their local variables.  A reference count of
+current activations is maintained in each clause.
+  
+... *)
+  
+DEFINITION MODULE Stacks;
+
+FROM AtomTable IMPORT term, clptr;
+
+CONST
+   MaxFrames = 1000              (* Max. no. of active goals. *);
+   LocSize = 2000                (* Max. no. of local variables. *);
+
+TYPE
+   env = [0..MaxFrames];
+   trail = CARDINAL;
+   glostackptr = CARDINAL;
+   
+VAR
+   envtop: env                  (* Stack pointer for display. *);
+   choicepoint: env             (* Last non-determinate choice. *);
+
+   (* The local stack is in two parts.  Clause activation records are
+      kept in display, and local variables in nodes pointed at by elements
+      of locstack. This inelegancy is forced by the type rules of Pascal. *)
+      
+   locstack: ARRAY [1 .. LocSize] OF term;
+   
+   display: ARRAY [1 .. MaxFrames] OF 
+      RECORD
+         Fcall: term            (* Invoking goal. *);
+         Fenv: env              (* Environment for the goal *);
+         Fchoice: env           (* Choicepoint at activation. *);
+         Fclause: clptr         (* Active clause. *);
+         Ftrail: trail          (* Head of trail at activation. *);
+         Fglotop: glostackptr   (* Top of global stack at activation. *);
+         Fbase: [0 .. LocSize]    (* Base of frame in locstack. *)
+      END;
+  
+PROCEDURE TrailVar(v: term); 
+  
+PROCEDURE NewGlobal(VAR x: term);
+  
+PROCEDURE NewEnv(VAR e: env; callp: term; envp: env;
+                               clausep: clptr; nvars: CARDINAL); 
+  
+PROCEDURE GetEnv(e: env; VAR callp: term; VAR envp: env; 
+                                           VAR clausep: clptr);
+  
+PROCEDURE Cut(e: env);
+
+PROCEDURE DisposeEnv; 
+
+PROCEDURE KillStacks(newtop: env);
+  
+PROCEDURE EnvRef(offset: INTEGER; e: env): term;
+  
+PROCEDURE ChangeClause(e: env; newcl: clptr);
+
+END Stacks.

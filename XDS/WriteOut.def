@@ -1,1 +1,30 @@
-../Orig/WriteOut.def
+
+(*  ...
+  
+[8] WRITEOUT
+  
+WriteOut writes a term to a file given by file descriptor.
+The style of output depends on the parameter 'style': 
+  
+   style = 1   'write'
+   style = 2   'writeq'
+   style = 3   'display'.
+  
+... *)
+
+DEFINITION MODULE WriteOut;
+
+FROM PFiles    IMPORT filedesc;
+FROM AtomTable IMPORT atom, term;
+FROM Stacks    IMPORT env;
+
+TYPE
+   tracemessage = (goalD, provedD);
+  
+PROCEDURE WriteAtom(fd: filedesc; a: atom; literal: BOOLEAN); 
+ 
+PROCEDURE WriteOut(fd: filedesc; x: term; e: env; style: INTEGER);
+  
+PROCEDURE Trace(m: tracemessage; x: term; e: env);
+
+END WriteOut.

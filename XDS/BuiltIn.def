@@ -1,1 +1,59 @@
-../Orig/BuiltIn.def
+ 
+(*  ...
+  
+[11]  EXECUTE
+  
+Execute is the finite state control of the abstract Prolog machine. It
+executes the goal 'goalp' by manipulating the local and global stacks
+[4], and uses Unify [10] to match goals against clauses from the
+database [9]. CallEvalPred [12] handles evaluable predicates.
+  
+... *)
+
+ 
+(*  ...
+  
+[12]  EVALUABLE PREDICATES
+  
+The following evaluable predicates are implemented directly: 
+  
+      call, !, get0, put, nl, abort,
+      atom, integer, var, name, is, <,
+      functor, arg, eoln, eof, see, seeing, tell, 
+      telling, close.
+  
+Other evaluable predicates are defined in the library file in
+terms of either these or the following 'secret' predicates:  
+  
+     '$op', '$clenv', '$getcl', '$advcl', '$zap', '$addcl',
+     '$read', '$write', '$setflg', '$flag', '$ucode', '$nonsp'.
+     
+     New Built In's: time
+  
+To each of the directly implemented evaluable predicates corresponds a
+value of the enumerated type 'evalpred'.
+  
+... *)
+  
+DEFINITION MODULE BuiltIn;
+
+FROM AtomTable IMPORT term,clptr;
+FROM Stacks    IMPORT env;
+FROM Unify     IMPORT UnifyResult;
+
+TYPE InterpreterState = (callQ, procQ, bodyQ, returnQ, failQ);
+
+     ProcessDescriptor =
+     RECORD
+        callp: term;
+        envp, callenv, baseenv, startenv: env;
+        clausep: clptr;
+        state: InterpreterState
+     END;
+
+PROCEDURE StartExecution(goalp: term; goalenv: env; 
+                         VAR d: ProcessDescriptor): UnifyResult;
+
+PROCEDURE Execute(VAR d: ProcessDescriptor): UnifyResult;
+
+END BuiltIn.

@@ -1,1 +1,39 @@
-../Orig/ErrorHandler.def
+  
+(*  ...  
+  
+[2]  ERROR REPORTING
+  
+There are three kinds of error: syntax errors, which result in
+failure of the function ReadIn [7], execution errors, which
+result in abortion and a return to the top level, and internal
+errors, which never happen, but would result in leaving the Prolog 
+system.  Production of error messages is mediated by the procedure
+Report, which pre-emptively crashes the system if errors occur
+during initialization.  The procedure Recover [1] produces an
+indication of the position of syntax errors.
+  
+... *)
+
+DEFINITION MODULE ErrorHandler;
+
+TYPE
+
+   error = (arityE, argsE, assertE, atomspaceE, badcddE, badcharE,
+      badcommaE, baddotE, badexpE, badketE, badvbarE, commentE, depthE,
+      divideE, eofE, framespaceE, localspaceE, needopE, needquoteE,
+      needrandE, precE, readstackE, sysprocE, weirdchE,
+      nvarsE, iodirE, filespaceE, nofileE, varexpE);
+  
+
+PROCEDURE Crash; 
+  
+PROCEDURE Abort; 
+  
+PROCEDURE Report(e: error);
+  
+PROCEDURE ExecError(e: error);
+  
+PROCEDURE InternalError(n: INTEGER);
+
+
+END ErrorHandler.

@@ -1,1 +1,72 @@
-../Orig/Files.def
+  
+(*  ...
+  
+[1]  FILE HANDLING
+  
+Files are represented in the main part of the interpreter by 
+file descriptors.  These are indices in the array 'filetable'.
+Input files are double-buffered to aid production of helpful
+syntax error messages.
+The bodies of the functions OpenFile and OpenLib and of
+the procedure CloseFile must be supplied for each machine.
+  
+... *)
+
+DEFINITION MODULE Files;
+
+FROM ErrorHandler IMPORT error;
+FROM AtomTable    IMPORT atom;
+
+CONST
+   MaxFiles = 5                 (* Max. no. of files open at once. *);
+   MaxLength = 200              (* Max. length of input line. *);
+   StandFD = 0                  (* File descriptor for standard files. *);
+
+TYPE
+   filedesc = [0 .. MaxFiles];
+   inout = (inZ, outZ);
+
+   class =
+      (smallC, largeC, digitC, specialC, quoteC, stropC, lparC, 
+         rparC, braC, ketC, lcurlyC, rcurlyC, commaC, cutC, semiC,
+         vbarC, spaceC, weirdC);
+
+VAR
+   charpos: [0 .. MaxLength]      (* Position in current input line. *);
+   errpos: [0 .. MaxLength]       (* Position of error marker. *);
+   current:                      (* Current input and output files. *)
+      ARRAY [inZ..outZ] OF filedesc;
+
+   (* Table of character types. *)
+   CharClass: ARRAY [0..255] OF class;
+ 
+
+PROCEDURE ReleaseFiles;
+  
+PROCEDURE GetChar(VAR ch: CHAR);
+  
+PROCEDURE PutChar(fd: filedesc; ch: CHAR);
+  
+PROCEDURE PutNum(fd: filedesc; n: INTEGER);
+  
+PROCEDURE PutLn(fd: filedesc);
+
+PROCEDURE LineEnded(): BOOLEAN;
+  
+PROCEDURE FileEnded(): BOOLEAN;
+  
+PROCEDURE CurrFile(dir: inout): atom;
+  
+PROCEDURE SelectFile(name: atom; dir: inout; VAR e: error): BOOLEAN; 
+  
+PROCEDURE DropFile(name: atom);
+  
+PROCEDURE SelectLib;
+  
+PROCEDURE DropLib;
+  
+PROCEDURE Recover;
+ 
+PROCEDURE InitFiles;
+
+END Files.

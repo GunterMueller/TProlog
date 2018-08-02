@@ -1,1 +1,6 @@
-../Orig/WAM.mod
+IMPLEMENTATION MODULE WAM;
+
+
+
+BEGIN
+END WAM.
